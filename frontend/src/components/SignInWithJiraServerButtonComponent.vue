@@ -22,7 +22,13 @@
       @hidden="resetModal"
       @ok="handleOk"
     >
-      <p>{{ $t("session.prepare.step.selection.mode.description.withJira.dialog.description") }}</p>
+      <p>
+        {{
+          $t(
+            "session.prepare.step.selection.mode.description.withJira.dialog.description"
+          )
+        }}
+      </p>
       <form ref="form" @submit.stop.prevent="handleSubmit">
         <b-form-group
           label="Verification code"
@@ -48,10 +54,12 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent, nextTick } from "vue";
+import { BModal } from "bootstrap-vue";
+import { useToast } from "vue-toastification";
 import apiService from "@/services/api.service";
 
-export default Vue.extend({
+export default defineComponent({
   name: "SignInWithJiraServerButtonComponent",
   props: {
     disabled: {
@@ -69,7 +77,9 @@ export default Vue.extend({
   },
   methods: {
     checkFormValidity() {
-      const valid = (this.$refs.form as Vue & { checkValidity: () => boolean }).checkValidity();
+      const valid = (
+        this.$refs.form as HTMLFormElement & { checkValidity: () => boolean }
+      ).checkValidity();
       this.verificationCodeState = valid;
       return valid;
     },
@@ -79,8 +89,11 @@ export default Vue.extend({
       window.open(tokenDto.url, "_blank")?.focus();
     },
     openModal() {
-      this.$nextTick(() => {
-        this.$bvModal.show("modal-verification-code");
+      nextTick(() => {
+        if (this.$refs?.["modal-verification-code"]) {
+          const modal = this.$refs?.["modal-verification-code"] as BModal;
+          modal.show();
+        }
       });
     },
     resetModal() {
@@ -106,15 +119,22 @@ export default Vue.extend({
       } catch (e) {
         this.showToast(e);
       }
-      this.$nextTick(() => {
-        this.$bvModal.hide("modal-verification-code");
+      nextTick(() => {
+        if (this.$refs?.["modal-verification-code"]) {
+          const modal = this.$refs?.["modal-verification-code"] as BModal;
+          modal.hide();
+        }
       });
     },
     showToast(error) {
       if (error.message == "failed to retrieve access token") {
-        this.$toast.error(this.$t("session.notification.messages.jiraCredentials"));
+        useToast().error(
+          this.$t("session.notification.messages.jiraCredentials")
+        );
       } else {
-        this.$toast.error(this.$t("session.notification.messages.jiraLoginFailed"));
+        useToast().error(
+          this.$t("session.notification.messages.jiraLoginFailed")
+        );
       }
       console.error(error);
     },

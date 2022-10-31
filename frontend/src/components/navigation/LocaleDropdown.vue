@@ -7,13 +7,15 @@
       @click="setLocale(key)"
       >{{ locale }}</b-dropdown-item
     >
+    <hr />
+    <b-dropdown-item href="https://crowdin.com/project/diveni">{{ $t("general.licenses.translations")}}</b-dropdown-item>
   </b-nav-item-dropdown>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "LocaleDropdown",
   data() {
     return {

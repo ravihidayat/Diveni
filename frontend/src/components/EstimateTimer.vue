@@ -7,15 +7,16 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "EstimateTimer",
   props: {
     startTimestamp: { type: String, required: true },
     duration: { type: Number, required: true },
     pauseTimer: { type: Boolean, required: true },
   },
+  emits: [ 'timerFinished' ],
   data() {
     return {
       timerCount: 0,
@@ -53,7 +54,7 @@ export default Vue.extend({
       this.startInterval();
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.intervalHandler);
   },
   methods: {
@@ -73,11 +74,13 @@ export default Vue.extend({
       if (this.duration === 0) {
         return;
       }
-      this.intervalHandler = setInterval(() => {
+      this.intervalHandler = window.setInterval(() => {
         if (this.timerCount > 0) {
           const startTime = new Date(this.startTimestamp).getTime();
           const currentTime = new Date().getTime();
-          this.timerCount = Math.ceil(this.duration - (currentTime - startTime) / 1000);
+          this.timerCount = Math.ceil(
+            this.duration - (currentTime - startTime) / 1000
+          );
         } else {
           this.$emit("timerFinished");
           clearInterval(this.intervalHandler);
